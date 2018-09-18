@@ -1,5 +1,7 @@
 package com.leetcode;
 
+import com.sun.deploy.util.ArrayUtil;
+
 import java.util.*;
 
 public class Solution {
@@ -980,13 +982,213 @@ public class Solution {
             }
             start++;
         }
-        System.out.println(nums);
     }
 
+    public static boolean containsDuplicate(int[] nums) {
+        Set<Integer> set = new HashSet<>();
+        for(int i  = 0; i < nums.length; i++){
+            if(set.contains(nums[i])){
+                return true;
+            }
+            set.add(nums[i]);
+        }
+        return false;
+    }
+
+    public static int singleNumber(int[] nums) {
+        if(nums.length == 1)return nums[0];
+        int start = 0;
+        int end = nums.length - 1;
+        while (start < nums.length - 1){
+            boolean flag = false;
+            for(int i = start + 1; i<= end; i++){
+                if(nums[start] == nums[i]){
+                    flag = true;
+                    int temp = nums[end];
+                    nums[end] = nums[i];
+                    nums[i] = temp;
+                    end--;
+                    break;
+                }
+            }
+            if(!flag)return nums[start];
+            start++;
+        }
+        return nums[(nums.length + 1)/2];
+
+        /**
+         *  ^ 操作
+         */
+//
+//        int result = 0;
+//        for (int i = 0; i < nums.length; i++){
+//            result = result ^ nums[i];
+//        }
+//        return result;
+    }
+
+    public static int[] intersection(int[] nums1, int[] nums2) {
+        Set<Integer> set = new HashSet<>();
+        for(int i = 0; i < nums1.length;i++){
+            for(int j = 0; j < nums2.length; j++){
+                if(nums1[i] == nums2[j]){
+                    set.add(nums1[i]);
+                    break;
+                }
+            }
+        }
+        int [] ret =  new int[set.size()];
+        int index = 0;
+        for (int i : set){
+            ret[index] = i;
+            index++;
+        }
+        return ret;
+    }
+
+    public static boolean isHappy(int n) {
+        Set<Integer> set = new HashSet<>();
+        while (true){
+            if(set.contains(n))return false;
+            set.add(n);
+            String str = String.valueOf(n);
+            int total = 0;
+            for(int i = 0; i < str.length();i++){
+                total += Math.pow(str.charAt(i) - 48,2);
+            }
+            if(total == 1)return true;
+            n = total;
+        }
+    }
+
+    public static int[] twoSum2(int[] nums, int target) {
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int i = 0; i < nums.length; i++){
+            map.put(nums[i],i);
+        }
+        for(int i = 0; i < nums.length;i++){
+            Integer index = map.get(target - nums[i]);
+            if(index != null && index != i){
+                return new int[]{i,index};
+            }
+        }
+        return null;
+    }
+
+    public static boolean isIsomorphic(String s, String t) {
+        for(int i = 0; i < s.length();i++){
+            char c1 = s.charAt(i);
+            char c2 = t.charAt(i);
+            int index1 = s.indexOf(c1,i + 1);
+            int index2 = t.indexOf(c2,i + 1);
+            while (index1 == index2 && index1 != -1){
+                index1 = s.indexOf(c1,index1 + 1);
+                index2 = t.indexOf(c2,index2 + 1);
+            }
+            if(index1 != index2)return false;
+        }
+        return true;
+    }
+
+    public static String[] findRestaurant(String[] list1, String[] list2) {
+        Map<String,Integer> map = new HashMap<>();
+        for(int i = 0; i < list1.length; i++){
+            map.put(list1[i],i);
+        }
+
+        int leastIndexSum = Integer.MAX_VALUE;
+        List<String> result = new ArrayList<>();
+        for(int i = 0; i < list2.length; i++){
+            String res = list2[i];
+            if(map.containsKey(res)){
+                int sum = map.get(res) + i;
+                if(sum < leastIndexSum){
+                    result.clear();
+                    leastIndexSum = sum;
+                    result.add(res);
+                }else if(sum == leastIndexSum){
+                    result.add(res);
+                }
+            }
+        }
+        return result.toArray(new String[0]);
+    }
+
+    public static int firstUniqChar(String s) {
+        Map<Character,List<Integer>> map = new HashMap<>();
+        for(int i = 0;i<s.length(); i++){
+            char c = s.charAt(i);
+            if(!map.containsKey(c)){
+                map.put(c,new ArrayList<>());
+            }
+            map.get(c).add(i);
+        }
+        for(int i = 0;i<s.length(); i++){
+            if(map.get(s.charAt(i)).size() == 1)return i;
+        }
+        return -1;
+    }
+
+    public static int[] intersect(int[] nums1, int[] nums2) {
+        Map<Integer,Integer> map = new HashMap<>();
+        for(int i = 0; i < nums1.length; i++){
+            if(!map.containsKey(nums1[i])){
+                map.put(nums1[i],1);
+            }else{
+                map.put(nums1[i],map.get(nums1[i]) + 1);
+            }
+        }
+        List<Integer> integers = new ArrayList<>();
+        for(int i = 0; i < nums2.length; i++){
+            if(map.containsKey(nums2[i])){
+                integers.add(nums2[i]);
+                int count = map.get(nums2[i]);
+                if(count <= 1){
+                    map.remove(nums2[i]);
+                }else{
+                    map.put(nums2[i],count - 1);
+                }
+            }
+        }
+        int []ret = new int[integers.size()];
+        for(int i = 0; i<ret.length; i++){
+            ret[i] = integers.get(i);
+        }
+        return ret;
+    }
+
+    public static boolean containsNearbyDuplicate(int[] nums, int k) {
+        Map<Integer,Integer>map = new HashMap<>();
+        for(int i = 0; i < nums.length; i++){
+            if(map.containsKey(nums[i])){
+                int index = map.get(nums[i]);
+                if(i - index <=k)return true;
+            }
+            map.put(nums[i],i);
+        }
+        return false;
+    }
+
+    public static List<List<String>> groupAnagrams(String[] strs) {
+        Map<Integer,List<String>> map = new HashMap<>();
+        int [] arr  = new int[26];
+        for(String str : strs){
+            Arrays.fill(arr,0);
+            for(int i = 0; i < str.length();i++){
+                arr[str.charAt(i)-'a'] +=1;
+            }
+            int key = Arrays.hashCode(arr);
+            if(!map.containsKey(key)){
+                map.put(key,new ArrayList<>());
+            }
+            map.get(key).add(str);
+        }
+        List<List<String>>lists = new ArrayList<>(map.values());
+        return lists;
+    }
 
     public static void main(String[]args){
-        moveZeroes(new int[]{0,1,0,3,12});
-
-        moveZeroes(new int[]{0,0,1});
+        System.out.println(containsNearbyDuplicate(new int[]{1,2,3,1,2,3},2));
     }
+
 }
