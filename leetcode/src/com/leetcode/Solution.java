@@ -1,7 +1,5 @@
 package com.leetcode;
 
-import com.sun.deploy.util.ArrayUtil;
-
 import java.util.*;
 
 public class Solution {
@@ -1187,8 +1185,138 @@ public class Solution {
         return lists;
     }
 
-    public static void main(String[]args){
-        System.out.println(containsNearbyDuplicate(new int[]{1,2,3,1,2,3},2));
+    public static boolean isValidSudoku(char[][] board) {
+
+        for(int i = 0; i<9; i++){
+            HashSet<Character> rows = new HashSet<>();
+            HashSet<Character> columns = new HashSet<>();
+            HashSet<Character> cube = new HashSet<>();
+            for (int j = 0; j < 9;j++){
+                if(board[i][j]!='.' && !rows.add(board[i][j]))
+                    return false;
+                if(board[j][i]!='.' && !columns.add(board[j][i]))
+                    return false;
+                int RowIndex = 3*(i/3);
+                int ColIndex = 3*(j/3);
+                if(board[RowIndex + i%3][ColIndex + j%3]!='.' && !cube.add(board[RowIndex + i%3][ColIndex + j%3]))
+                    return false;
+            }
+        }
+        return true;
     }
 
+    public static List<TreeNode> findDuplicateSubtrees(TreeNode root) {
+        Map<String,List<TreeNode>> map = new HashMap<>();
+        foreachTreeNode(root,map);
+        List<TreeNode> dups = new ArrayList<>();
+        for (List<TreeNode> group : map.values())
+            if (group.size() > 1) dups.add(group.get(0));
+        return dups;
+    }
+
+    private static String foreachTreeNode(TreeNode root, Map<String,List<TreeNode>> map){
+        if(root == null)return "";
+        String str = "(" + foreachTreeNode(root.left,map) + root.val + foreachTreeNode(root.right,map) +")";
+        if(!map.containsKey(str))map.put(str,new ArrayList<>());
+        map.get(str).add(root);
+        return str;
+    }
+
+    public static int numJewelsInStones(String J, String S) {
+        Map<Character,Integer> map = new HashMap<>();
+        for(int i = 0; i < S.length(); i++){
+            char c = S.charAt(i);
+            if(!map.containsKey(c)){
+                map.put(c,1);
+            }else{
+                map.put(c,map.get(c) + 1);
+            }
+        }
+        int total = 0;
+        for(int i = 0; i < J.length(); i++){
+            char c = J.charAt(i);
+            if(map.containsKey(c)){
+                total += map.get(c);
+            }
+        }
+        return total;
+    }
+
+    public static int lengthOfLongestSubstring(String s) {
+        Map<Character,Integer> map = new HashMap<>();
+        int maxLen = 0;
+        for(int i = 0; i < s.length();i++){
+            char c = s.charAt(i);
+            if(!map.containsKey(c)){
+                map.put(c,i);
+            }else{
+                int index = map.get(c);
+                i = index;
+                map.clear();
+            }
+            if(maxLen < map.size()){
+                maxLen = map.size();
+            }
+        }
+        return maxLen;
+    }
+
+    public static int fourSumCount(int[] A, int[] B, int[] C, int[] D) {
+        Map<Integer,List<String>> mapAB = getSumMap(A,B);
+        Map<Integer,List<String>> mapCD = getSumMap(C,D);
+
+        int total = 0;
+        for(Integer i : mapAB.keySet()){
+            if(mapCD.containsKey(-i)){
+                total += mapAB.get(i).size() * mapCD.get(-i).size();
+            }
+        }
+        return total;
+    }
+
+    private static Map<Integer,List<String>> getSumMap(int []a,int []b){
+        Map<Integer,List<String>> map = new HashMap<>();
+        for(int i = 0; i < a.length; i++){
+            for(int j = 0; j < b.length; j++){
+                int sum = a[i] + b[j];
+                String value = i +"_"+j;
+                if(!map.containsKey(sum)){
+                    map.put(sum,new ArrayList<>());
+                }
+                map.get(sum).add(value);
+            }
+        }
+        return map;
+    }
+
+
+    public static List<Integer> topKFrequent(int[] nums, int k) {
+        List<Integer> result = new ArrayList<>();
+        if(nums.length <= k){
+            for(int num : nums)result.add(num);
+        }else{
+
+            Map<Integer,Integer> map = new HashMap<>();
+            for(int num : nums){
+                if(!map.containsKey(num)){
+                    map.put(num,1);
+                }else{
+                    map.put(num,map.get(num) + 1);
+                }
+            }
+            PriorityQueue<Integer> queue = new PriorityQueue<>((o1,o2) -> map.get(o2) - map.get(o1));
+            for(int num : map.keySet()){
+                queue.add(num);
+            }
+            for(int i = 0; i < k; i++){
+                result.add(queue.poll());
+            }
+        }
+        return result;
+    }
+
+    public static void main(String[]args) {
+        List<Integer> list = topKFrequent(new int[]{1,1,1,2,2,3},2);
+        System.out.println(list);
+    }
 }
