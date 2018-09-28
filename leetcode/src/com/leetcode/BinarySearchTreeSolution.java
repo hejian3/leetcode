@@ -1,9 +1,6 @@
 package com.leetcode;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class BinarySearchTreeSolution {
 
@@ -82,7 +79,6 @@ public class BinarySearchTreeSolution {
         return root;
     }
 
-
     public TreeNode deleteNode(TreeNode root, int key) {
         if(root == null)return null;
         if(root.val > key)root.left = deleteNode(root.left,key);
@@ -102,7 +98,6 @@ public class BinarySearchTreeSolution {
         return root;
     }
 
-
     public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
         if(root == null || root == p || root == q)return root;
         TreeNode left = lowestCommonAncestor(root.left,p,q);
@@ -112,56 +107,62 @@ public class BinarySearchTreeSolution {
         return right;
     }
 
+
     public boolean containsNearbyAlmostDuplicate(int[] nums, int k, int t) {
+        if (nums == null || nums.length == 0 || k <= 0) {
+            return false;
+        }
+
+        final TreeSet<Long> set = new TreeSet<>();
+        for (int ind = 0; ind < nums.length; ind++) {
+
+            final Long floor = set.floor(nums[ind] + (long)t);
+            final Long ceil = set.ceiling(nums[ind] - (long)t);
+            if ((floor != null && floor >= nums[ind])
+                || (ceil != null && ceil <= nums[ind])) {
+                return true;
+            }
+
+            set.add((long)nums[ind]);
+
+            if (ind >= k) {
+                set.remove((long)nums[ind - k]);
+            }
+        }
         return false;
     }
 
+
+    public boolean isBalanced(TreeNode root) {
+        if(root == null)return true;
+        boolean flag =  Math.abs(maxDepth(root.left) - maxDepth(root.right)) <= 1;
+        return flag && isBalanced(root.left) && isBalanced(root.right);
+    }
+
+    private int maxDepth(TreeNode root) {
+        if (root == null) {
+            return 0;                                   // return 0 for null node
+        }
+        int left_depth = maxDepth(root.left);
+        int right_depth = maxDepth(root.right);
+        return Math.max(left_depth, right_depth) + 1;
+    }
+
+    public TreeNode sortedArrayToBST(int[] nums) {
+        if(nums == null || nums.length == 0)return null;
+        int mid = nums.length / 2;
+        TreeNode root = new TreeNode(nums[mid]);
+        root.left = sortedArrayToBST(Arrays.copyOfRange(nums,0,mid));
+        root.right = sortedArrayToBST(Arrays.copyOfRange(nums,mid + 1,nums.length));
+        return root;
+    }
+
     public static void main(String [] args){
-
         BinarySearchTreeSolution searchTreeSolution = new BinarySearchTreeSolution();
-
-        TreeNode three = new TreeNode(3);
-        TreeNode zero = new TreeNode(0);
-        TreeNode one = new TreeNode(1);
-        TreeNode two = new TreeNode(2);
-        TreeNode five = new TreeNode(5);
-        TreeNode four = new TreeNode(4);
-        TreeNode six = new TreeNode(6);
-        TreeNode seven = new TreeNode(7);
-
-
-        five.left = two;
-        five.right = six;
-        two.left = one;
-        two.right =four;
-        four.left = three;
-        six.right = seven;
-        six.left = zero;
-
-        TreeNode node = searchTreeSolution.deleteNode(five,6);
-        System.out.println(node);
-
-        KthLargest kthLargest1 = new KthLargest(3,new int[]{4,5,8,2});
-        System.out.println(kthLargest1.add(3));   // returns 4
-        System.out.println(kthLargest1.add(5));   // returns 5
-        System.out.println(kthLargest1.add(10));  // returns 5
-        System.out.println(kthLargest1.add(9));   // returns 8
-        System.out.println(kthLargest1.add(4));   // returns 8
-
-        KthLargest kthLargest2 = new KthLargest(1,new int[0]);
-        System.out.println(kthLargest2.add(-3));
-        System.out.println(kthLargest2.add(-2));
-        System.out.println(kthLargest2.add(-4));
-        System.out.println(kthLargest2.add(0));
-        System.out.println(kthLargest2.add(4));
-
-
-        KthLargest kthLargest3 = new KthLargest(2,new int[]{0});
-        System.out.println(kthLargest3.add(-1));
-        System.out.println(kthLargest3.add(1));
-        System.out.println(kthLargest3.add(-2));
-        System.out.println(kthLargest3.add(-4));
-        System.out.println(kthLargest3.add(3));
+        TreeNode root = searchTreeSolution.sortedArrayToBST(new int[]{-10,-3,0,5,9});
+        System.out.println(root);
+        root = searchTreeSolution.sortedArrayToBST(new int[]{0,1,2,3,4,5});
+        System.out.println(root);
     }
 
     public class BSTIterator {
