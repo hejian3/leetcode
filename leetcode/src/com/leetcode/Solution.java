@@ -1,5 +1,6 @@
 package com.leetcode;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class Solution {
@@ -1315,8 +1316,347 @@ public class Solution {
         return result;
     }
 
+    public static String longestPalindrome(String s) {
+        char[] arrs = new char[s.length() * 2 + 2];
+        int [] P = new int[arrs.length];
+        arrs[0] = '$';
+        arrs[1] = '#';
+        int j = 2;
+        for(int i = 0; i < s.length(); i++){
+            arrs[j++] = s.charAt(i);
+            arrs[j++] = '#';
+        }
+
+        int mx = 0;
+        int id = 0;
+
+        for(int i = 1; i < arrs.length; i++){
+            if(mx > i){
+                P[i] = Math.min(P[2 * id - i], mx - i);
+            }else{
+                P[i] = 1;
+            }
+
+            while (i + P[i] < arrs.length && arrs[i + P[i]] == arrs[i - P[i]])P[i]++;
+            if(i + P[i] > mx){
+                mx = i + P[i];
+                id = i;
+            }
+        }
+
+        int maxLen = -1;
+        int maxIndex = 0;
+        for(int i = 0; i < arrs.length; i++){
+            if(P[i] - 1 > maxLen){
+                maxLen = P[i] - 1;
+                maxIndex = i;
+            }
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int i = maxIndex - maxLen; i <= maxIndex + maxLen; i++){
+            if(arrs[i] != '#')stringBuilder.append(arrs[i]);
+        }
+        return stringBuilder.toString();
+    }
+
+    public String convert(String s, int numRows) {
+        if (numRows == 1) return s;
+
+        List<StringBuilder> rows = new ArrayList<>();
+        for (int i = 0; i < Math.min(numRows, s.length()); i++)
+            rows.add(new StringBuilder());
+
+        int curRow = 0;
+        boolean goingDown = false;
+
+        for (char c : s.toCharArray()) {
+            rows.get(curRow).append(c);
+            if (curRow == 0 || curRow == numRows - 1) goingDown = !goingDown;
+            curRow += goingDown ? 1 : -1;
+        }
+
+        StringBuilder ret = new StringBuilder();
+        for (StringBuilder row : rows) ret.append(row);
+        return ret.toString();
+    }
+
+    public static int reverse(int x) {
+        int rev = 0;
+        while (x != 0) {
+            int pop = x % 10;
+            x /= 10;
+            if (rev > Integer.MAX_VALUE/10 || (rev == Integer.MAX_VALUE / 10 && pop > 7)) return 0;
+            if (rev < Integer.MIN_VALUE/10 || (rev == Integer.MIN_VALUE / 10 && pop < -8)) return 0;
+            rev = rev * 10 + pop;
+        }
+        return rev;
+    }
+
+    public static int myAtoi(String str) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for(int i = 0; i < str.length(); i++){
+            char c = str.charAt(i);
+            if(stringBuilder.length() == 0 && c != ' ' && c != '-' && c != '+' && (c < '0' || c > '9'))return 0;
+            if(stringBuilder.length() > 0  && (c < '0' || c > '9'))break;
+            if(c != ' ') stringBuilder.append(c);
+        }
+        if(stringBuilder.length() == 0 ||
+                (stringBuilder.length() == 1 && (stringBuilder.charAt(0) =='-' || stringBuilder.charAt(0) =='+')))return 0;
+        BigDecimal result = new BigDecimal(stringBuilder.toString());
+        if(result.compareTo(new BigDecimal(Integer.MAX_VALUE)) >= 1)return Integer.MAX_VALUE;
+        if(result.compareTo(new BigDecimal(Integer.MIN_VALUE)) <= -1)return Integer.MIN_VALUE;
+        return result.intValue();
+    }
+
+    public boolean isPalindrome(int x) {
+        if(x < 0 || (x % 10 == 0 && x != 0)) {
+            return false;
+        }
+
+        int revertedNumber = 0;
+        while(x > revertedNumber) {
+            revertedNumber = revertedNumber * 10 + x % 10;
+            x /= 10;
+        }
+        return x == revertedNumber || x == revertedNumber/10;
+    }
+
+    public boolean isMatch(String text, String pattern) {
+        if (pattern.isEmpty()) return text.isEmpty();
+        boolean first_match = (!text.isEmpty() &&
+                (pattern.charAt(0) == text.charAt(0) || pattern.charAt(0) == '.'));
+
+        if (pattern.length() >= 2 && pattern.charAt(1) == '*'){
+            return (isMatch(text, pattern.substring(2)) ||
+                    (first_match && isMatch(text.substring(1), pattern)));
+        } else {
+            return first_match && isMatch(text.substring(1), pattern.substring(1));
+        }
+    }
+
+    public int maxArea(int[] height) {
+        int maxArea = 0;
+        int l = 0;
+        int r = height.length - 1;
+        while (l < r){
+            maxArea = Math.max(maxArea,Math.min(height[l],height[r]) * (r - l));
+            if(height[l] > height[r]){
+                r++;
+            }else{
+                l++;
+            }
+        }
+        return maxArea;
+    }
+
+    /**
+     * Symbol       Value
+     * I             1
+     * V             5
+     * X             10
+     * L             50
+     * C             100
+     * D             500
+     * M             1000
+     * @param num
+     * @return
+     */
+    public static String intToRoman(int num) {
+        StringBuilder sb = new StringBuilder();
+        return intToRoman(sb,num);
+    }
+
+    /**
+     * nice job
+     * @param num
+     * @return
+     */
+    public static String intToRoman2(int num) {
+        String M[] = {"", "M", "MM", "MMM"};
+        String C[] = {"", "C", "CC", "CCC", "CD", "D", "DC", "DCC", "DCCC", "CM"};
+        String X[] = {"", "X", "XX", "XXX", "XL", "L", "LX", "LXX", "LXXX", "XC"};
+        String I[] = {"", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"};
+        return M[num/1000] + C[(num%1000)/100] + X[(num%100)/10] + I[num%10];
+    }
+
+    private static String intToRoman(StringBuilder sb, int num){
+        if(num == 0) return sb.toString();
+        if(num / 1000 > 0){
+            int count =  num / 1000;
+            for (int i = 0; i < count; i++) {
+                sb.append('M');
+            }
+            return intToRoman(sb,num - count * 1000);
+        }else if(num / 100 > 0){
+            int count = num / 100;
+            if(count == 9){
+                sb.append("CM");
+            }else if(count > 5){
+                sb.append('D');
+                for(int i = 0; i < count - 5; i++){
+                    sb.append('C');
+                }
+            }else if(count == 5){
+                sb.append('D');
+            }else if(count == 4){
+                sb.append("CD");
+            }else{
+                for(int i = 0; i < count; i++){
+                    sb.append('C');
+                }
+            }
+            return intToRoman(sb,num - count * 100);
+        }else if(num / 10 > 0){
+            int count = num / 10;
+            if(count == 9){
+                sb.append("XC");
+            }else if(count > 5){
+                sb.append('L');
+                for(int i = 0; i < count - 5; i++){
+                    sb.append('X');
+                }
+            }else if(count == 5){
+                sb.append('L');
+            }else if(count == 4){
+                sb.append("XL");
+            }else{
+                for(int i = 0; i < count; i++){
+                    sb.append('X');
+                }
+            }
+            return intToRoman(sb,num - count * 10);
+        }else{
+            if(num == 9){
+                sb.append("IX");
+            }else if(num > 5){
+                sb.append('V');
+                for(int i = 0; i < num - 5; i++){
+                    sb.append('I');
+                }
+            }else if(num == 5){
+                sb.append('V');
+            }else if(num == 4){
+                sb.append("IV");
+            }else{
+                for(int i = 0; i < num; i++){
+                    sb.append('I');
+                }
+            }
+            return intToRoman(sb,0);
+        }
+    }
+
+
+    public static int romanToInt(String s) {
+        char last = ' ';
+        int total = 0;
+        for(char c : s.toCharArray()){
+            if(c == 'M') total += 1000;
+            else if(c == 'D')total += 500;
+            else if(c == 'C')total += 100;
+            else if(c == 'L')total += 50;
+            else if(c == 'X')total += 10;
+            else if(c == 'V')total += 5;
+            else if(c == 'I')total += 1;
+            if(last =='I' && (c =='V' || c =='X')){
+                total -= 2;
+            }else if(last =='X' && (c =='L' || c =='C')) {
+                total -= 20;
+            }else if(last == 'C' && (c == 'D' || c == 'M')){
+                total -= 200;
+            }
+            last = c;
+        }
+        return total;
+    }
+
+    public static List<List<Integer>> threeSum(int[] nums) {
+        Arrays.sort(nums);
+        List<List<Integer>> result = new ArrayList<>();
+        for(int i = 0; i < nums.length; i++){
+            if(i > 0 && nums[i] == nums[i - 1])continue;
+            int res = - nums[i];
+            int start = i + 1;
+            int end = nums.length - 1;
+            while (start < end) {
+                if (nums[start] + nums[end] == res) {
+                    result.add(Arrays.asList(nums[i], nums[start], nums[end]));
+                    start++;
+                    while (start < end && nums[start] == nums[start - 1]) start++;
+                } else if (nums[start] + nums[end] < res) start++;
+                else end--;
+            }
+        }
+        return result;
+    }
+
+
+    public static int threeSumClosest(int[] nums, int target) {
+        Arrays.sort(nums);
+        int result = Integer.MAX_VALUE;
+        for(int i = 0; i < nums.length; i++){
+            if(i > 0 && nums[i] == nums[i - 1])continue;
+            int res = target - nums[i];
+            int start = i + 1;
+            int end = nums.length - 1;
+            while (start < end) {
+                int total = nums[start] + nums[end] + nums[i];
+                if(result == Integer.MAX_VALUE || Math.abs(result - target) > Math.abs(total - target)){
+                    result = total;
+                }
+                if (nums[start] + nums[end] == res) return target;
+                else if (nums[start] + nums[end] < res) start++;
+                else end--;
+            }
+        }
+        return result;
+    }
+
+    public static List<String> letterCombinations(String digits) {
+        if(digits.isEmpty())return Collections.emptyList();
+        String [] str = new String[]{"abc","def","ghi","jkl","mno","pqrs","tuv","wxyz"};
+        return letterCombinationsRecursive(str,Arrays.asList(""),digits,0);
+    }
+
+    private static List<String> letterCombinationsRecursive(String [] str,List<String> list,String digits,int index){
+        if(index >=digits.length())return list;
+        List<String> res = new ArrayList<>();
+        for(String s : list){
+            for(char c : str[digits.charAt(index) - '2'].toCharArray()){
+                res.add(s + c);
+            }
+        }
+        return letterCombinationsRecursive(str,res,digits,index + 1);
+    }
+
+    public static List<List<Integer>> fourSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        List<List<Integer>> result = new ArrayList<>();
+        for(int i = 0; i < nums.length; i++){
+            if(i > 0 && nums[i] == nums[i - 1])continue;
+            for(int j = i + 1; j < nums.length;j++) {
+                if(j > 2 && nums[j] == nums[j - 1])continue;
+                int res = target - nums[i] - nums[j];
+                int start = j + 1;
+                int end = nums.length - 1;
+                while (start < end) {
+                    if (nums[start] + nums[end] == res) {
+                        result.add(Arrays.asList(nums[i], nums[j], nums[start], nums[end]));
+                        start++;
+                        while (start < end && nums[start] == nums[start - 1]) start++;
+                    } else if (nums[start] + nums[end] < res) start++;
+                    else end--;
+                }
+            }
+        }
+        return result;
+    }
+
     public static void main(String[]args) {
-        List<Integer> list = topKFrequent(new int[]{1,1,1,2,2,3},2);
-        System.out.println(list);
+        System.out.println(fourSum(new int[]{0,0,0,0},0));
+        System.out.println(fourSum(new int[]{-1,0,1,2,-1,-4},-1));
+        System.out.println(fourSum(new int[]{1, 0, -1, 0, -2, 2},0));
+        System.out.println(fourSum(new int[]{-3,-2,-1,0,0,1,2,3},0));
     }
 }
