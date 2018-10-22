@@ -1,5 +1,7 @@
 package com.leetcode;
 
+import org.omg.PortableInterceptor.INACTIVE;
+
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -1635,28 +1637,115 @@ public class Solution {
         List<List<Integer>> result = new ArrayList<>();
         for(int i = 0; i < nums.length; i++){
             if(i > 0 && nums[i] == nums[i - 1])continue;
-            for(int j = i + 1; j < nums.length;j++) {
-                if(j > 2 && nums[j] == nums[j - 1])continue;
-                int res = target - nums[i] - nums[j];
-                int start = j + 1;
-                int end = nums.length - 1;
-                while (start < end) {
-                    if (nums[start] + nums[end] == res) {
-                        result.add(Arrays.asList(nums[i], nums[j], nums[start], nums[end]));
-                        start++;
-                        while (start < end && nums[start] == nums[start - 1]) start++;
-                    } else if (nums[start] + nums[end] < res) start++;
-                    else end--;
+            List<List<Integer>> res = threeSum(nums,target - nums[i],i + 1);
+            if(!res.isEmpty()){
+                for(List<Integer> integers : res){
+                    integers.add(0,nums[i]);
+                    result.add(integers);
                 }
             }
         }
         return result;
     }
 
+    private static List<List<Integer>> threeSum(int[] nums,int target,int index) {
+        List<List<Integer>> result = new ArrayList<>();
+        for(int i = index; i < nums.length; i++){
+            if(i > index && nums[i] == nums[i - 1])continue;
+            int res = target - nums[i];
+            int start = i + 1;
+            int end = nums.length - 1;
+            while (start < end) {
+                if (nums[start] + nums[end] == res) {
+                    List<Integer> list = new ArrayList<>(4);
+                    list.add(nums[i]);
+                    list.add(nums[start]);
+                    list.add(nums[end]);
+                    result.add(list);
+                    start++;
+                    while (start < end && nums[start] == nums[start - 1]) start++;
+                } else if (nums[start] + nums[end] < res) start++;
+                else end--;
+            }
+        }
+        return result;
+    }
+
+
+    public static List<String> generateParenthesis(int n) {
+        if(n == 1)return Arrays.asList("()");
+        List<String> res = generateParenthesis(n - 1);
+        Set<String> set = new HashSet<>();
+        for(String str : res){
+            set.add("()"+str);
+            set.add("("+str+")");
+            set.add(str+"()");
+            int index = 0;
+            int leftP = str.indexOf(")",0);
+            while (leftP != -1) {
+                if(str.indexOf("(",index) > leftP) {
+                    set.add("(" + str.substring(0, leftP) + ")" + str.substring(leftP));
+                }
+                index = leftP + 1;
+                leftP = str.indexOf(")",index);
+            }
+            index = str.length() - 1;
+            int rightP = str.lastIndexOf("(");
+            while (rightP != -1) {
+                if(str.lastIndexOf(")",index) > rightP) {
+                    set.add(str.substring(0, rightP) + "(" + str.substring(rightP) + ")");
+                }
+                index = rightP - 1;
+                rightP = str.lastIndexOf("(",index);
+            }
+        }
+        return new ArrayList<>(set);
+    }
+
+    public static ListNode mergeKLists(ListNode[] lists) {
+        if(lists == null || lists.length == 0)return null;
+        ListNode ret = null;
+        ListNode cur = null;
+        ListNode minNode = null;
+        int index = -1;
+        while (true) {
+            for (int i = 0; i < lists.length; i++) {
+                ListNode node = lists[i];
+                if(node == null)continue;
+                if (minNode == null || minNode.val > node.val) {
+                    minNode = node;
+                    index = i;
+                }
+            }
+            if(index == -1)break;
+            if(ret == null){
+                ret =  minNode;
+                cur = minNode;
+            }else{
+                cur.next = minNode;
+                cur = cur.next;
+            }
+            lists[index] = minNode.next;
+            minNode.next = null;
+            minNode = null;
+            index = -1;
+        }
+        return ret;
+    }
+
+
     public static void main(String[]args) {
-        System.out.println(fourSum(new int[]{0,0,0,0},0));
-        System.out.println(fourSum(new int[]{-1,0,1,2,-1,-4},-1));
-        System.out.println(fourSum(new int[]{1, 0, -1, 0, -2, 2},0));
-        System.out.println(fourSum(new int[]{-3,-2,-1,0,0,1,2,3},0));
+        ListNode node1 = new ListNode(1);
+        node1.next = new ListNode(4);
+        node1.next.next = new ListNode(5);
+
+        ListNode node2 = new ListNode(1);
+        node2.next = new ListNode(3);
+        node2.next.next = new ListNode(4);
+
+        ListNode node3 = new ListNode(2);
+        node3.next = new ListNode(6);
+
+        System.out.println(mergeKLists(new ListNode[]{node1,node2,node3}));
     }
 }
