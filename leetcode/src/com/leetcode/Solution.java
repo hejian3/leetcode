@@ -1,7 +1,5 @@
 package com.leetcode;
 
-import org.omg.PortableInterceptor.INACTIVE;
-
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -1733,19 +1731,217 @@ public class Solution {
         return ret;
     }
 
+    public ListNode swapPairs(ListNode head) {
+        if(head == null || head.next == null)return head;
+        ListNode nextHead = head.next.next;
+        ListNode newHead = head.next;
+        newHead.next = head;
+        head.next = swapPairs(nextHead);
+        return newHead;
+    }
+
+    public static ListNode reverseKGroup(ListNode head, int k) {
+        if(head == null)return head;
+        Stack<ListNode> stack = new Stack<>();
+        ListNode node = head;
+        while (true){
+            stack.push(node);
+            if (stack.size() == k)break;
+            node = node.next;
+            if(node == null)break;
+        }
+
+        ListNode next = null;
+        if(node != null) next = reverseKGroup(node.next, k);
+        if(stack.isEmpty() || stack.size() < k){
+            if(node != null)node.next = next;
+            return head;
+        }else{
+            ListNode ret = stack.pop();
+            node = ret;
+            while (!stack.isEmpty()){
+                node.next = stack.pop();
+                node = node.next;
+            }
+            if(node != null) node.next = next;
+            return ret;
+        }
+    }
+
+
+    public static int divide(int dividend, int divisor) {
+        boolean isNegative = (dividend < 0 && divisor > 0) || (dividend > 0 && divisor < 0) ? true : false;
+        long absDividend = Math.abs((long) dividend);
+        long absDivisor = Math.abs((long) divisor);
+        long result = 0;
+        while(absDividend >= absDivisor){
+            long tmp = absDivisor, count = 1;
+            while(tmp <= absDividend){
+                tmp <<= 1;
+                count <<= 1;
+            }
+            result += count >> 1;
+            absDividend -= tmp >> 1;
+        }
+        return  isNegative ? (int) ~result + 1 : result > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) result;
+    }
+
+    public static List<Integer> findSubstring(String s, String[] words) {
+        List<Integer> res = new LinkedList<>();
+        if (s == null || s.isEmpty() || words == null || words.length == 0) return res;
+        int wl = words[0].length(), n = s.length(), m = words.length;
+        HashMap<String, Integer> map = new HashMap<>();
+
+        for (String w : words)
+            map.put(w, map.getOrDefault(w, 0) + 1);
+
+        for (int i = 0; i < wl; i++) {
+            HashMap<String, Integer> temp = new HashMap<>();
+            int count = 0;
+            int lo = i;
+            for (int hi = i; hi + wl <= n; hi += wl) {
+                String sHi = s.substring(hi, hi + wl);
+                if (map.containsKey(sHi)) {
+                    temp.put(sHi, temp.getOrDefault(sHi, 0) + 1);
+                    count++;
+                    while (temp.get(sHi) > map.get(sHi)) {
+                        String sLo = s.substring(lo, lo + wl);
+                        temp.put(sLo, temp.get(sLo) - 1);
+                        count--;
+                        lo += wl;
+                    }
+                    if (count == m) {
+                        res.add(lo);
+                        String sLo = s.substring(lo, lo + wl);
+                        temp.put(sLo, temp.get(sLo) - 1);
+                        count--;
+                        lo += wl;
+                    }
+                } else {
+                    temp.clear();
+                    count = 0;
+                    lo = hi + wl;
+                }
+            }
+        }
+
+        return res;
+    }
+
+    public static int longestValidParentheses(String s) {
+        int maxans = 0;
+        Stack<Integer> stack = new Stack<>();
+        stack.push(-1);
+        for (int i = 0; i < s.length(); i++) {
+            if (s.charAt(i) == '(') {
+                stack.push(i);
+            } else {
+                stack.pop();
+                if (stack.empty()) {
+                    stack.push(i);
+                } else {
+                    maxans = Math.max(maxans, i - stack.peek());
+                }
+            }
+        }
+        return maxans;
+    }
+
+    public static int searchInsert(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1;
+        while (left <= right){
+            int mid = (left + right) / 2;
+            if(nums[mid] == target)return mid;
+            else if(nums[mid] < target)left = mid + 1;
+            else if(nums[mid] > target)right = mid - 1;
+        }
+        return left;
+    }
+
+    public static String countAndSay(int n) {
+        if(n == 1)return "1";
+        String s  = countAndSay(n - 1);
+        int count  = 0;
+        char last = '@';
+        StringBuilder stringBuilder = new StringBuilder();
+        for(char c : s.toCharArray()){
+            if(count > 0 && last !=c){
+                stringBuilder.append(count).append(last);
+                count = 1;
+                last = c;
+            }else{
+                count++;
+                last = c;
+            }
+        }
+        stringBuilder.append(count).append(last);
+        return stringBuilder.toString();
+    }
+
+    public static List<List<Integer>> combinationSum(int[] candidates, int target) {
+        return combinationSum(candidates,target,new ArrayList<>());
+    }
+
+    private static List<List<Integer>> combinationSum(int [] candidates, int target, List<Integer> integers){
+        List<List<Integer>> res = new ArrayList<>();
+        for(int num : candidates){
+            if(integers.size() > 0 && integers.get(integers.size() - 1) > num)continue;
+            if(target - num >= 0){
+                List<Integer> temp = new ArrayList<>(integers);
+                temp.add(num);
+                if(target - num == 0){
+                    res.add(temp);
+                }else{
+                    List<List<Integer>> result = combinationSum(candidates,target - num,temp);
+                    res.addAll(result);
+                }
+            }
+        }
+        return res;
+    }
+
+    public static List<List<Integer>> combinationSum2(int[] candidates, int target) {
+        Arrays.sort(candidates);
+        return combinationSum2(candidates,target,0,new ArrayList<>());
+    }
+
+    private static List<List<Integer>> combinationSum2(int [] candidates,int target,int index,List<Integer> integers){
+        List<List<Integer>> res = new ArrayList<>();
+        for(int i = index; i < candidates.length; i++){
+            if (i > index && candidates[i] == candidates[i-1]) continue;
+            int num = candidates[i];
+            if(target - num >= 0){
+                List<Integer> temp = new ArrayList<>(integers);
+                temp.add(num);
+                if(target - num == 0){
+                    res.add(temp);
+                }else{
+                    List<List<Integer>> result = combinationSum2(candidates,target - num,i + 1,temp);
+                    res.addAll(result);
+                }
+            }
+        }
+        return res;
+    }
+
+    public static int firstMissingPositive(int[] nums) {
+        boolean [] arr = new boolean[nums.length];
+        for(int num : nums){
+            if(num > 0 && num <= nums.length){
+                arr[num - 1] = true;
+            }
+        }
+        for(int i = 0; i < arr.length;i++){
+            if(!arr[i])return i + 1;
+        }
+        return nums.length + 1;
+    }
 
     public static void main(String[]args) {
-        ListNode node1 = new ListNode(1);
-        node1.next = new ListNode(4);
-        node1.next.next = new ListNode(5);
-
-        ListNode node2 = new ListNode(1);
-        node2.next = new ListNode(3);
-        node2.next.next = new ListNode(4);
-
-        ListNode node3 = new ListNode(2);
-        node3.next = new ListNode(6);
-
-        System.out.println(mergeKLists(new ListNode[]{node1,node2,node3}));
+        System.out.println(firstMissingPositive(new int[0]));
+        System.out.println(firstMissingPositive(new int[]{1,2,0}));
+        System.out.println(firstMissingPositive(new int[]{3,4,-1,1}));
+        System.out.println(firstMissingPositive(new int[]{7,8,9,11,12}));
     }
 }
